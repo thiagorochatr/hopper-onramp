@@ -36,6 +36,6 @@ app.register(generatePix);
 
 app.register(transferOnchain);
 
-app.listen({ port: Number(process.env.PORT) }).then(() => {
-  console.log(`Server is running on port ${process.env.PORT}`);
+app.listen({ port: 3333 }).then(() => {
+  console.log(`Server is running on port 3333`);
 });
