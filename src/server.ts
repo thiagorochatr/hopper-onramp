@@ -1,86 +1,41 @@
 import fastify from "fastify";
 import cors from "@fastify/cors";
-import axios from "axios";
 import dotenv from 'dotenv';
-import QRCode from 'qrcode';
+import { transferOnchain } from "./routes/transfer-onchain";
+import { generatePix } from "./routes/generate-pix";
+import fastifyJwt from '@fastify/jwt';
+import { fetchJwtToken } from './middlewares/fetchJwtToken';
 
 dotenv.config();
 
 const app = fastify();
+
+(async () => {
+  try {
+    await fetchJwtToken();
+  } catch (error) {
+    console.error('Erro ao iniciar o servidor:');
+    process.exit(1);
+  }
+})();
+
+app.register(fastifyJwt, {
+  secret: 'sua_chave_secreta',
+});
 
 app.register(cors, {
   origin: "*", // == true
 });
 
 app.get("/", async (request, reply) => {
+  reply.send({ hello: "world" });
   return { hello: "world" };
 });
 
-app.get('/generate-pix', async (request, reply) => {
-  const { amount } = request.query as { amount: string };
+app.register(generatePix);
 
-  const token = process.env.TOKEN;
-  
-  const options = {
-    method: 'GET',
-    url: `https://api.brla.digital:5567/v1/business/pay-in/br-code`,
-    params: { amount },
-    headers: {
-      accept: 'application/json',
-      authorization: `Bearer ${token}`,
-    },
-  };
+app.register(transferOnchain);
 
-  try {
-    const response = await axios.request(options);
-
-    const brCode = response.data.brCode;
-
-    const qrCodeDataURL = await QRCode.toDataURL(brCode, { type: 'image/png' });
-    const base64 = qrCodeDataURL.split(',')[1];
-
-    return {
-      brCode,
-      base64,
-    };
-  } catch (error) {
-    console.error('Erro ao gerar o QR Code:', error);
-    reply.status(500).send({ error: 'Erro ao gerar o código Pix' });
-  }
-});
-
-app.post('/onchain-transfer', async (request, reply) => {
-  const { chain, inputCoin, outputCoin, to, value } = request.body as {
-    chain: string; inputCoin: string; outputCoin: string; to: string; value: number
-  };
-
-  const token = process.env.TOKEN;
-
-  const options = {
-    method: 'POST',
-    url: 'https://api.brla.digital:5567/v1/business/on-chain/transfer',
-    headers: {
-      accept: 'application/json',
-      'content-type': 'application/json',
-      authorization: `Bearer ${token}`,
-    },
-    data: {
-      chain,
-      inputCoin,
-      outputCoin,
-      to,
-      value
-    },
-  };
-  
-  try {
-    const response = await axios.request(options);
-    return response.data;
-  } catch (error) {
-    console.error('Erro na operação on-chain:', error);
-  }
-});
-
-app.listen({ port: 3333 }).then(() => {
-  console.log(`Server is running on port 3333`);
+app.listen({ port: Number(process.env.PORT) }).then(() => {
+  console.log(`Server is running on port ${process.env.PORT}`);
 });
