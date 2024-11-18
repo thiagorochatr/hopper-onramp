@@ -26,7 +26,6 @@ export async function generatePix(app: FastifyInstance) {
   
       const qrCodeDataURL = await QRCode.toDataURL(brCode, { type: 'image/png' });
       const base64 = qrCodeDataURL.split(',')[1];
-  console.log('Código Pix gerado:', brCode);
       return {
         brCode,
         base64,

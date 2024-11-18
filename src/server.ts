@@ -1,11 +1,10 @@
-import fastify from "fastify";
 import cors from "@fastify/cors";
-import dotenv from 'dotenv';
-import { transferOnchain } from "./routes/transfer-onchain";
-import { generatePix } from "./routes/generate-pix";
 import fastifyJwt from '@fastify/jwt';
+import dotenv from 'dotenv';
+import fastify from "fastify";
 import { fetchJwtToken } from './middlewares/fetchJwtToken';
-import { generatePixTest } from "./routes/generate-pix-test";
+import { generatePix } from "./routes/generate-pix";
+import { transferOnchain } from "./routes/transfer-onchain";
 
 dotenv.config();
 
@@ -21,7 +20,7 @@ const app = fastify();
 })();
 
 app.register(fastifyJwt, {
-  secret: 'sua_chave_secreta',
+  secret: String(process.env.JWT_SECRET) ?? 'jwt-secret',
 });
 
 app.register(cors, {
@@ -34,7 +33,6 @@ app.get("/", async (request, reply) => {
 });
 
 app.register(generatePix);
-app.register(generatePixTest);
 
 app.register(transferOnchain);
 

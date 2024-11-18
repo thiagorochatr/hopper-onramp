@@ -6,8 +6,14 @@ export async function fetchJwtToken() {
   const options = {
     method: 'POST',
     url: 'https://api.brla.digital:5567/v1/business/login',
-    headers: { accept: 'application/json', 'content-type': 'application/json' },
-    data: { email: process.env.BRLA_EMAIL, password: process.env.BRLA_PASSWORD },
+    headers: { 
+      accept: 'application/json',
+      'content-type': 'application/json'
+    },
+    data: { 
+      email: process.env.BRLA_EMAIL,
+      password: process.env.BRLA_PASSWORD
+    },
   };
 
   try {
