@@ -5,6 +5,7 @@ import { transferOnchain } from "./routes/transfer-onchain";
 import { generatePix } from "./routes/generate-pix";
 import fastifyJwt from '@fastify/jwt';
 import { fetchJwtToken } from './middlewares/fetchJwtToken';
+import { generatePixTest } from "./routes/generate-pix-test";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.get("/", async (request, reply) => {
 });
 
 app.register(generatePix);
+app.register(generatePixTest);
 
 app.register(transferOnchain);
 
